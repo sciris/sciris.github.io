@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <link rel="icon" type="image/x-icon" href="./assets/img/favicon.ico">
+  <link rel="apple-touch-icon" sizes="76x76" href="./assets/img/sciris-logo.png">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>{{ title or "Sciris: Simplifying scientific software in Python" }}</title>
+
+  <link href="./assets/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="./assets/css/paper-kit.css?v=2.1.1" rel="stylesheet" />
+  <link href="./assets/css/demo.css" rel="stylesheet" />
+  <link href="./assets/css/prism.css" rel="stylesheet" />
+  <link href="./assets/css/prism-lite.css" rel="stylesheet" />
+
+  <meta name="description" content="Sciris is a library of tools that make writing scientific Python code easier and more pleasant.">
+  <meta property="og:site_name" content="Sciris">
+  <meta property="og:title" content="Sciris: Simplifying scientific software in Python">
+  <meta property="og:description" content="Sciris is a library of tools that make writing scientific Python code easier and more pleasant.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://sciris.org/">
+  <meta property="og:image" content="https://sciris.org/assets/img/sciris-logo.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300..700&display=swap" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Montserrat:400,300,700|Work+Sans|Material+Icons' rel='stylesheet' type='text/css'>
+
+  <style>
+    body, p, .card-description, li { font-family: "Raleway", "Montserrat", "Lato", sans-serif; }
+    .header_link { font-size: 18px; }
+    .header_link.active { font-weight: bold; color: #75A8D9; }
+    .citation { background:#f8f9fa; border-left:4px solid #75A8D9; padding:15px 20px; border-radius:4px; font-size:0.95em; line-height:1.6; }
+    /* The hero is a gradient rather than a photo, so it needs no dark filter */
+    .page-header .filter { background: none; }
+    .featurecols h4 { font-size: 1.1em; font-weight: bold; margin-bottom: 5px; }
+    .featurecols ul { padding-left: 20px; }
+    .featurecols code { font-size: 0.95em; }
+    .nav-link-narrow { padding-left: 12px; padding-right: 12px; }
+    /* Paper Kit's default footer text is too dark to read on the black footer */
+    .footer-black .copyright, .footer-black .copyright a { color: #a0a0a0; }
+  </style>
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg fixed-top" color-on-scroll="450">
+  <div class="container">
+    <div class="navbar-translate">
+      <a class="navbar-brand" href="https://sciris.org/">
+        <img src="./assets/img/sciris-logo-horiz-white.png" id="header_logo" style="width:150px; margin-top:-6px;" alt="Sciris logo">
+      </a>
+      <button class="navbar-toggler navbar-toggler-right navbar-burger" type="button" data-toggle="collapse" data-target="#navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-bar"></span>
+        <span class="navbar-toggler-bar"></span>
+        <span class="navbar-toggler-bar"></span>
+      </button>
+    </div>
+    <div class="collapse navbar-collapse" id="navbarToggler">
+      <ul class="navbar-nav ml-auto">
+{% for item in nav %}
+        <li class="nav-item"><a href="{{ item[1] }}" class="header_link"> {{ item[0] }}</a></li>
+{% endfor %}
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="wrapper">
+  <div class="page-header page-header-small" style="background-image: linear-gradient(135deg, #151515 0%, #2c3e50 55%, #447099 100%);">
+    <div class="container">
+      <div class="filter"></div>
+      <div class="motto">
+        <h1 style="padding-top:40px; font-weight:bold; font-size:3em;">{{ hero | mdinline | safe }}</h1>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="section" style="padding:0px;">
+      <div class="container">
+
+{{ content | safe }}
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer footer-black">
+  <div class="container footcontainer">
+    <div class="row footrow" style="padding: 50px 0px;">
+      <nav class="footer-nav">
+        <div>{{ footer_left | mdpara | safe }}</div>
+      </nav>
+      <div class="credits ml-auto">
+        <span class="copyright">{{ footer_right | mdinline | safe }}</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Core JS Files -->
+<script src="./assets/js/jquery-3.2.1.min.js"></script>
+<script src="./assets/js/prism.js"></script>
+<script src="./assets/js/jquery-ui-1.12.1.custom.min.js"></script>
+<script src="./assets/js/popper.js"></script>
+<script src="./assets/js/bootstrap.min.js"></script>
+<script src="./assets/js/bootstrap-switch.min.js"></script>
+<script src="./assets/js/paper-kit.js?v=2.1.1"></script>
+
+<!-- Scrollspy: highlight the active section in the navbar -->
+<script>
+  const changeNav = (entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting && entry.intersectionRatio >= 0.55) {
+        const currentActive = document.querySelector('.navbar-nav .header_link.active');
+        if (currentActive) currentActive.classList.remove('active');
+        const id = entry.target.getAttribute('id');
+        const newLink = document.querySelector(`.navbar-nav [href="#${id}"]`);
+        if (newLink) newLink.classList.add('active');
+      }
+    });
+  };
+  const observer = new IntersectionObserver(changeNav, { threshold: 0.55 });
+  document.querySelectorAll('section').forEach((s) => observer.observe(s));
+</script>
+
+</body>
+</html>

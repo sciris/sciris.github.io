@@ -1,0 +1,74 @@
+code[class*="language-"],
+pre[class*="language-"] {
+	color: #37474f;
+	background: none;
+	font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+	word-wrap: normal;
+	line-height: 1.5;
+
+	-moz-tab-size: 4;
+	-o-tab-size: 4;
+	tab-size: 4;
+
+	-webkit-hyphens: none;
+	-moz-hyphens: none;
+	-ms-hyphens: none;
+	hyphens: none;
+
+}
+
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+	background: #f1f3f4;
+}
+
+.token.punctuation {
+	color: #37474f;
+}
+
+.nav-link-narrow {
+	padding-left: 0.5rem;
+	padding-right: 0.5rem;
+}
+
+.card-top-shadow {
+	box-shadow: 0 6px 10px 1px rgba(0, 0, 0, 0.15);
+}
+
+.nav-tabs .nav-item .nav-link.active:before, .nav-tabs .nav-item .nav-link.active:hover:before, .nav-tabs .nav-item .nav-link.active:focus:before {
+    border-bottom: 11px solid #A49E93;
+}
+
+.nav-tabs-navigation {
+  border-bottom: 1px solid #A49E93;
+}
+
+.tablist-icon {
+	vertical-align: top;
+}
+
+.tablist-text {
+	display:inline-block;
+	line-height: 20px;
+}
+
+ul#icons-links {
+	padding-left: 0px;
+}
+
+.youtube iframe{
+	width: 100%;
+}
+
+.copyright > a:not(.btn) {
+	color: #777777;
+}
+
+.copyright > a:not(.btn):hover, .copyright > a:not(.btn):focus {
+	color: #E3E3E3;
+}
