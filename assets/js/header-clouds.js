@@ -51,9 +51,11 @@
       var ph2 = rand() * Math.PI * 2;
       var amp = jitter * lerp(0.5, 1.3, rand());
 
-      // Cover a random run of the line rather than all of it.
-      var span = Math.round(pts.length * lerp(0.55, 1.0, rand()));
-      var start = Math.floor(rand() * (pts.length - span + 1));
+      // Cover a random run of the line rather than all of it, unless the
+      // caller needs the line to start where it starts (the lobe lines have
+      // to meet the skyline).
+      var span = opts.full ? pts.length : Math.round(pts.length * lerp(0.55, 1.0, rand()));
+      var start = opts.full ? 0 : Math.floor(rand() * (pts.length - span + 1));
       var end = Math.min(pts.length, start + span);
 
       ctx.beginPath();
@@ -152,11 +154,41 @@
     return arcs;
   }
 
+  // Keep the top of an arc and a variable run of it below: the line should
+  // start at the notch where two puffs meet on the skyline and trail down into
+  // the body of the cloud, not float in the middle of it. Drawn all the way
+  // round it would read as a ring stamped on the cloud.
+  function trimArc(run, rand) {
+    var ordered = run[0].y <= run[run.length - 1].y ? run : run.slice().reverse();
+    var keep = Math.round(ordered.length * lerp(0.3, 0.85, rand()));
+    if (keep < 6) return null;
+    return ordered.slice(0, keep);
+  }
+
+  // Push an arc off its circle: a slow radial wobble plus a vertical squash,
+  // so no two lobes are the same shape and none of them is a clean circle.
+  function deformArc(run, centre, rand) {
+    var p1 = rand() * Math.PI * 2;
+    var p2 = rand() * Math.PI * 2;
+    var a1 = lerp(0.06, 0.16, rand());
+    var a2 = lerp(0.03, 0.09, rand());
+    var squash = lerp(0.78, 1.0, rand());
+    var out = [];
+    for (var i = 0; i < run.length; i++) {
+      var dx = run[i].x - centre.x;
+      var dy = run[i].y - centre.y;
+      var ang = Math.atan2(dy, dx);
+      var wob = 1 + a1 * Math.sin(2 * ang + p1) + a2 * Math.sin(3 * ang + p2);
+      out.push({ x: centre.x + dx * wob, y: centre.y + dy * wob * squash });
+    }
+    return out;
+  }
+
   // Where two neighbouring puffs overlap, the smaller one's arc *inside* the
-  // larger is the crescent you would draw to show one lobe bulging in front of
-  // the other. These interior lines are what stop the cloud reading as a flat
-  // outline: they give it front-to-back depth.
-  function lobeArcs(shape) {
+  // larger is the line you would draw to show one lobe bulging in front of the
+  // other. Only a stretch of it is kept, wobbled off true: these interior
+  // lines should suggest depth, not outline a row of balloons.
+  function lobeArcs(shape, rand) {
     var arcs = [];
     for (var i = 0; i < shape.puffs.length - 1; i++) {
       var a = shape.puffs[i];
@@ -166,6 +198,8 @@
       var d = Math.sqrt(dx * dx + dy * dy);
       // Skip pairs that barely touch, or where one swallows the other whole.
       if (d >= a.r + b.r || d <= Math.abs(a.r - b.r) * 1.05) continue;
+      // Leave some overlaps undrawn, so the lobes do not march in step.
+      if (rand() < 0.28) continue;
 
       var small = a.r <= b.r ? a : b;
       var big = a.r <= b.r ? b : a;
@@ -185,13 +219,19 @@
         if (inside && y < shape.base - small.r * 0.05) {
           run.push({ x: x, y: y });
         } else {
-          if (run.length > 8) arcs.push(run);
+          push(arcs, run, small, rand);
           run = [];
         }
       }
-      if (run.length > 8) arcs.push(run);
+      push(arcs, run, small, rand);
     }
     return arcs;
+  }
+
+  function push(arcs, run, centre, rand) {
+    if (run.length <= 10) return;
+    var trimmed = trimArc(run, rand);
+    if (trimmed) arcs.push(deformArc(trimmed, centre, rand));
   }
 
   function cloudPath(ctx, shape) {
@@ -232,9 +272,9 @@
     ctx.restore();
 
     // Interior lobes first, so the silhouette drawn over them stays crisp.
-    var lobes = lobeArcs(shape);
+    var lobes = lobeArcs(shape, rand);
     for (var j = 0; j < lobes.length; j++) {
-      pencilStroke(ctx, lobes[j], rand, { passes: 2, jitter: 0.9, alpha: 0.2, width: 1 });
+      pencilStroke(ctx, lobes[j], rand, { passes: 1, jitter: 0.8, alpha: 0.22, width: 1, full: true });
     }
 
     var arcs = outlineArcs(shape);
