@@ -40,13 +40,8 @@
     /* The hero is light, so the navbar reads as dark ink on it as on the page */
     .navbar .navbar-toggler-bar { background: #16283c; }
     .hero { position: relative; overflow: hidden; background-color: #f7f9fc; }
-    .hero #hero-fractal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-    /* A white veil over the fractal, so the title stays the loudest thing here */
-    .hero::before {
-      content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(255, 255, 255, 0.35); z-index: 1;
-    }
-    /* Fade the fractal out into the white page below it */
+    .hero #hero-clouds { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+    /* Fade the clouds out into the white page below them */
     .hero::after {
       content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 45%;
       background: linear-gradient(to bottom, rgba(255,255,255,0), #ffffff); z-index: 1;
@@ -108,7 +103,7 @@
 
 <div class="wrapper">
   <div class="page-header page-header-small hero">
-    <canvas id="hero-fractal"></canvas>
+    <canvas id="hero-clouds"></canvas>
     <div class="container">
       <div class="filter"></div>
       <div class="motto">
@@ -149,7 +144,7 @@
 <script src="./assets/js/bootstrap.min.js"></script>
 <script src="./assets/js/bootstrap-switch.min.js"></script>
 <script src="./assets/js/paper-kit.js?v=2.1.1"></script>
-<script src="./assets/js/header-fractal.js?v=2"></script>
+<script src="./assets/js/header-clouds.js?v=2"></script>
 
 <!-- Scrollspy: highlight the active section in the navbar -->
 <script>
