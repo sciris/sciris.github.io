@@ -6,10 +6,20 @@
 (function () {
   "use strict";
 
-  var CANVAS_ID = "hero-clouds";
+  var CANVAS_CLASS = "sky-canvas";
 
+  // Pencil and paper colours come from the stylesheet, so the light and dark
+  // themes can each set their own; readTheme() picks up the current pair.
   var GRAPHITE = "70, 82, 98";
   var FILL = "rgba(255, 255, 255, 0.78)";
+
+  function readTheme() {
+    var css = window.getComputedStyle(document.documentElement);
+    var ink = css.getPropertyValue("--cloud-ink").trim();
+    var fill = css.getPropertyValue("--cloud-fill").trim();
+    if (ink) GRAPHITE = ink;
+    if (fill) FILL = fill;
+  }
 
   // Clouds are laid out in depth layers. Within a layer every cloud moves at
   // the same speed and they are evenly spaced around a wrap-around band, so
@@ -297,15 +307,36 @@
 
   /* ---- The sky --------------------------------------------------------- */
 
-  var clouds = [];
-  var canvas, ctx, cssW, cssH, dpr;
-  var lastTime = 0;
-  var animating = false;
+  // Each .sky-canvas on the page gets its own sky. They share one animation
+  // frame loop rather than each running their own.
+  function Sky(canvas, seed) {
+    this.canvas = canvas;
+    this.seed = seed;
+    this.clouds = [];
+    // data-flip turns the sky upside down; data-drift="rtl" sends it the
+    // other way. The footer uses both.
+    this.flip = canvas.hasAttribute("data-flip");
+    this.dir = canvas.getAttribute("data-drift") === "rtl" ? -1 : 1;
+  }
 
-  function build() {
-    var rand = rng(20140107);
-    var scale = Math.max(0.75, cssH / 290);
-    clouds = [];
+  Sky.prototype.setup = function () {
+    var canvas = this.canvas;
+    this.cssW = canvas.offsetWidth;
+    this.cssH = canvas.offsetHeight;
+    if (!this.cssW || !this.cssH) return;
+    var dpr = Math.min(2, window.devicePixelRatio || 1);
+    canvas.width = Math.round(this.cssW * dpr);
+    canvas.height = Math.round(this.cssH * dpr);
+    this.ctx = canvas.getContext("2d");
+    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    this.build(dpr);
+    this.paint();
+  };
+
+  Sky.prototype.build = function (dpr) {
+    var rand = rng(this.seed);
+    var scale = Math.max(0.75, this.cssH / 290);
+    var clouds = [];
 
     for (var l = 0; l < LAYERS.length; l++) {
       var layer = LAYERS[l];
@@ -314,7 +345,7 @@
       // Space them barely more than a cloud apart, so the sky stays busy
       // without the clouds merging into one continuous bank.
       var spacing = midW * layer.gap;
-      var band = cssW + midW * 2;
+      var band = this.cssW + midW * 2;
       var count = Math.max(3, Math.round(band / spacing));
       var slot = band / count;
 
@@ -329,75 +360,101 @@
           band: band,
           // Even slots, nudged a little so the row does not look ruled.
           x: i * slot + (rand() - 0.5) * slot * 0.4 - midW,
-          y: lerp(layer.top, layer.bottom, rand()) * cssH,
+          y: lerp(layer.top, layer.bottom, rand()) * this.cssH,
           speed: layer.speed,
           alpha: layer.alpha * lerp(0.85, 1, rand()),
         });
       }
     }
     clouds.sort(function (a, b) { return a.alpha - b.alpha; });
-  }
+    this.clouds = clouds;
+  };
 
-  function paint() {
-    ctx.clearRect(0, 0, cssW, cssH);
-    for (var i = 0; i < clouds.length; i++) {
-      var c = clouds[i];
+  Sky.prototype.advance = function (dt) {
+    for (var i = 0; i < this.clouds.length; i++) {
+      var c = this.clouds[i];
+      c.x += c.speed * dt * this.dir;
+      // Wrapping by exactly one band keeps each layer evenly spaced forever.
+      if (c.x > c.band - c.w) c.x -= c.band;
+      else if (c.x < -c.w) c.x += c.band;
+    }
+  };
+
+  Sky.prototype.paint = function () {
+    if (!this.ctx) return;
+    var ctx = this.ctx;
+    ctx.clearRect(0, 0, this.cssW, this.cssH);
+    ctx.save();
+    if (this.flip) {
+      ctx.translate(0, this.cssH);
+      ctx.scale(1, -1);
+    }
+    for (var i = 0; i < this.clouds.length; i++) {
+      var c = this.clouds[i];
       ctx.globalAlpha = c.alpha;
       ctx.drawImage(c.sprite, c.x, c.y, c.w, c.h);
     }
     ctx.globalAlpha = 1;
-  }
+    ctx.restore();
+  };
+
+  var skies = [];
+  var lastTime = 0;
+  var animating = false;
 
   function step(now) {
     if (!animating) return;
     var dt = lastTime ? Math.min(0.05, (now - lastTime) / 1000) : 0;
     lastTime = now;
-    for (var i = 0; i < clouds.length; i++) {
-      var c = clouds[i];
-      c.x += c.speed * dt;
-      // Wrapping by exactly one band keeps each layer evenly spaced forever.
-      if (c.x > c.band - c.w) c.x -= c.band;
+    for (var i = 0; i < skies.length; i++) {
+      skies[i].advance(dt);
+      skies[i].paint();
     }
-    paint();
     requestAnimationFrame(step);
   }
 
-  function setup() {
-    canvas = document.getElementById(CANVAS_ID);
-    if (!canvas || !canvas.getContext) return;
-    cssW = canvas.offsetWidth;
-    cssH = canvas.offsetHeight;
-    if (!cssW || !cssH) return;
-    dpr = Math.min(2, window.devicePixelRatio || 1);
-    canvas.width = Math.round(cssW * dpr);
-    canvas.height = Math.round(cssH * dpr);
-    ctx = canvas.getContext("2d");
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    build();
-    paint();
+  function setupAll() {
+    readTheme();
+    for (var i = 0; i < skies.length; i++) skies[i].setup();
 
     var still = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (!still && !animating) {
+    if (!still && !animating && skies.length) {
       animating = true;
       lastTime = 0;
       requestAnimationFrame(step);
     }
   }
 
+  function init() {
+    var canvases = document.querySelectorAll("." + CANVAS_CLASS);
+    for (var i = 0; i < canvases.length; i++) {
+      // A different seed per sky, so the header and the footer differ.
+      skies.push(new Sky(canvases[i], 20140107 + i * 7919));
+    }
+    setupAll();
+  }
+
   var resizeTimer = null;
   function onResize() {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(function () {
-      if (!canvas) return;
-      if (canvas.offsetWidth === cssW && canvas.offsetHeight === cssH) return;
-      setup();
+      for (var i = 0; i < skies.length; i++) {
+        var s = skies[i];
+        if (s.canvas.offsetWidth !== s.cssW || s.canvas.offsetHeight !== s.cssH) {
+          setupAll();
+          return;
+        }
+      }
     }, 200);
   }
 
+  // Redraw in the current theme's colours (called by the light/dark switch).
+  window.scirisSky = { refresh: setupAll };
+
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", setup);
+    document.addEventListener("DOMContentLoaded", init);
   } else {
-    setup();
+    init();
   }
   window.addEventListener("resize", onResize);
 })();

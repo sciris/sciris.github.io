@@ -13,8 +13,12 @@ footer_left: |
   © 2014–2026 by the Sciris Development Team
 
   Sciris is developed by the [Institute for Disease Modeling](https://idmod.org), the [Burnet Institute](https://burnet.edu.au), and other collaborators.
-footer_right: |
-  [GitHub](https://github.com/sciris/sciris) | [Docs](https://docs.sciris.org) | [PyPI](https://pypi.org/project/sciris) | [Paper](https://doi.org/10.21105/joss.05076) | [Contact](mailto:info@sciris.org)
+footer_links:
+  - [GitHub, "https://github.com/sciris/sciris", mark-github]
+  - [Docs, "https://docs.sciris.org", code]
+  - [PyPI, "https://pypi.org/project/sciris", package]
+  - [Paper, "https://doi.org/10.21105/joss.05076", book]
+  - [Contact, "mailto:info@sciris.org", mail]
 ---
 
 {% section "what", "What is Sciris?" %}

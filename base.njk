@@ -26,58 +26,167 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rosario:ital,wght@0,300..700;1,300..700&family=Rosarivo:ital@0;1&display=swap" rel="stylesheet">
-  <link href='https://fonts.googleapis.com/css?family=Montserrat:400,300,700|Work+Sans|Material+Icons' rel='stylesheet' type='text/css'>
+
+  <!-- Set the theme before first paint, so a dark-mode visitor sees no flash -->
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem("sciris-theme");
+        var dark = saved ? saved === "dark"
+          : window.matchMedia("(prefers-color-scheme: dark)").matches;
+        if (dark) document.documentElement.setAttribute("data-theme", "dark");
+      } catch (e) {}
+    })();
+  </script>
 
   <style>
-    /* Rosarivo for headings and the navbar, Rosario for body text */
-    body, p, .card-description, li { font-family: "Rosario", "Montserrat", "Lato", sans-serif; }
+    /* Two fonts only: Rosarivo for headings and the navbar, Rosario for
+       everything else. Paper Kit's Raleway/Montserrat/Work Sans are all
+       overridden below. */
+    :root {
+      --font-body: "Rosario", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      --font-head: "Rosarivo", Georgia, "Times New Roman", serif;
+
+      --bg: #ffffff;
+      --text: #3a4550;
+      --heading: #16283c;
+      --link: #2a7fb8;
+      --link-hover: #1a5f8f;
+      --card: #ffffff;
+      --card-border: rgba(0, 0, 0, 0.07);
+      --rule: #111318;
+      --nav-bg: rgba(255, 255, 255, 0.93);
+      --nav-border: #e4eaf1;
+      --sky-top: #c4ddf2;
+      --sky-mid: #e2eff9;
+      --sky-edge: #ffffff;
+      --cloud-ink: 70, 82, 98;
+      --cloud-fill: rgba(255, 255, 255, 0.78);
+    }
+    [data-theme="dark"] {
+      --bg: #0f1720;
+      --text: #b9c6d4;
+      --heading: #e9f0f7;
+      --link: #7cb9e8;
+      --link-hover: #a8d3f5;
+      --card: #17212c;
+      --card-border: rgba(255, 255, 255, 0.09);
+      --rule: #31414f;
+      --nav-bg: rgba(15, 23, 32, 0.92);
+      --nav-border: #24313e;
+      --sky-top: #16324b;
+      --sky-mid: #12212f;
+      --sky-edge: #0f1720;
+      --cloud-ink: 176, 200, 224;
+      --cloud-fill: rgba(150, 185, 220, 0.13);
+    }
+
+    body, p, li, td, th, .card-description, .btn, button, input, select, textarea {
+      font-family: var(--font-body);
+    }
     h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, h6, .card-category, .motto h1,
     .navbar .header_link, .nav-tabs .nav-link {
-      font-family: "Rosarivo", "Rosario", "Montserrat", serif;
+      font-family: var(--font-head);
     }
-    .header_link { font-size: 18px; color: #16283c; }
-    .header_link:hover, .header_link:focus { color: #75A8D9; }
-    /* The hero is light, so the navbar reads as dark ink on it as on the page */
-    .navbar .navbar-toggler-bar { background: #16283c; }
-    /* Sky: light blue at the top, washing out to the white page at the bottom */
-    .hero {
-      position: relative; overflow: hidden;
-      background: linear-gradient(to bottom, #c4ddf2 0%, #e2eff9 45%, #ffffff 100%);
+    code, pre, kbd, code[class*="language-"], pre[class*="language-"] {
+      font-family: Consolas, Monaco, "Ubuntu Mono", monospace;
     }
-    .hero #hero-clouds { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-    /* Fade the clouds out into the white page below them */
-    .hero::after {
-      content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 35%;
-      background: linear-gradient(to bottom, rgba(255,255,255,0), #ffffff); z-index: 1;
-    }
-    .hero .container { position: relative; z-index: 2; }
-    .hero .motto h1 {
-      padding-top: 40px; font-weight: bold; font-size: 3em; color: #16283c;
-    }
-    /* Function names link to the API reference, but read as plain code */
-    a.apilink, a.apilink:hover { color: inherit; }
-    a.apilink code { border-bottom: 1px dotted #75A8D9; }
-    a.apilink:hover code { color: #75A8D9; }
-    .header_link.active { font-weight: bold; color: #75A8D9; }
-    .citation { background:#f8f9fa; border-left:4px solid #75A8D9; padding:15px 20px; border-radius:4px; font-size:0.95em; line-height:1.6; }
-    /* Paper Kit dims page headers for photo backgrounds; the hero is light */
-    .page-header .filter, .page-header .filter::after { background: none; }
-    /* Likewise, the navbar's dark gradient would fight with the light hero */
+
+    body { background: var(--bg); color: var(--text); }
+    h1, h2, h3, h4, h5, h6, .card-category { color: var(--heading); }
+    a { color: var(--link); }
+    a:hover, a:focus { color: var(--link-hover); }
+
+    .header_link { font-size: 18px; color: var(--heading); }
+    .header_link:hover, .header_link:focus { color: var(--link); }
+    .header_link.active { font-weight: bold; color: var(--link); }
+    .navbar .navbar-toggler-bar { background: var(--heading); }
+    /* Paper Kit's navbar is a dark gradient; the site is not */
     .navbar {
       background-image: none;
-      background-color: rgba(255, 255, 255, 0.93);
+      background-color: var(--nav-bg);
       border-bottom-width: 1px;
-      border-color: #e4eaf1 !important;
+      border-color: var(--nav-border) !important;
     }
+    [data-theme="dark"] #header_logo { filter: invert(1) brightness(1.6); }
+
+    /* Sky: a gradient with pencil clouds drifting across it */
+    .sky { position: relative; overflow: hidden; }
+    .sky .sky-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+    .sky > .container { position: relative; z-index: 2; }
+    .hero { background: linear-gradient(to bottom, var(--sky-top) 0%, var(--sky-mid) 45%, var(--sky-edge) 100%); }
+    /* Fade the clouds out into the page below them */
+    .hero::after {
+      content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 35%;
+      background: linear-gradient(to bottom, rgba(0,0,0,0), var(--sky-edge)); z-index: 1;
+    }
+    .hero .motto h1 { padding-top: 40px; font-weight: bold; font-size: 3em; }
+    /* Paper Kit dims page headers for photo backgrounds; the hero is light */
+    .page-header .filter, .page-header .filter::after { background: none; }
+
+    /* Function names link to the API reference */
+    a.apilink, a.apilink code { color: var(--link); }
+    a.apilink:hover, a.apilink:hover code { color: var(--link-hover); }
+    a.apilink code { border-bottom: 1px dotted currentColor; }
+
+    .card { background-color: var(--card); border: 1px solid var(--card-border); }
+    .citation {
+      background: var(--card); border-left: 4px solid var(--link);
+      padding: 15px 20px; border-radius: 4px; font-size: 0.95em; line-height: 1.6;
+    }
+    [data-theme="dark"] .citation { background: #17212c; }
     .featurecols h4 { font-size: 1.1em; font-weight: bold; margin-bottom: 5px; }
     .featurecols ul { padding-left: 20px; }
     .featurecols code { font-size: 0.95em; }
     .nav-link-narrow { padding-left: 12px; padding-right: 12px; }
-    /* Paper Kit's default footer text is too dark to read on the black footer */
-    .footer-black .copyright, .footer-black .copyright a { color: #a0a0a0; }
-    /* The footer links are now the only thing on the right, so pin them there */
-    .footer .credits { text-align: right; }
-    .footer .credits .copyright { font-size: 1em; }
+    /* Prism's palette is built for a light background, so code stays light */
+    [data-theme="dark"] :not(pre) > code[class*="language-"],
+    [data-theme="dark"] pre[class*="language-"] { background: #e9edf0; }
+    [data-theme="dark"] .nav-tabs .nav-link { color: var(--text); }
+    /* The card icons are flat black PNGs/SVGs, invisible on a dark card */
+    [data-theme="dark"] .card-image img { filter: invert(0.85); }
+
+    /* Light/dark switch */
+    .theme-toggle {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: none; border: 0; padding: 8px 0 8px 18px; cursor: pointer;
+      color: var(--heading);
+    }
+    .theme-toggle svg { width: 16px; height: 16px; display: block; opacity: 0.55; }
+    .theme-toggle .tt-sun { opacity: 1; }
+    [data-theme="dark"] .theme-toggle .tt-sun { opacity: 0.45; }
+    [data-theme="dark"] .theme-toggle .tt-moon { opacity: 1; }
+    .tt-track {
+      width: 34px; height: 18px; border-radius: 9px; position: relative;
+      background: var(--nav-border); border: 1px solid var(--card-border);
+      transition: background 0.2s;
+    }
+    .tt-knob {
+      position: absolute; top: 2px; left: 2px; width: 12px; height: 12px;
+      border-radius: 50%; background: var(--heading); transition: transform 0.2s;
+    }
+    [data-theme="dark"] .tt-knob { transform: translateX(16px); }
+
+    /* Footer: a hairline rule, then more sky */
+    .footer {
+      border-top: 1px solid var(--rule);
+      background: linear-gradient(to bottom, var(--sky-edge) 0%, var(--sky-mid) 55%, var(--sky-top) 100%);
+      color: var(--text);
+    }
+    .footer a { color: var(--link); }
+    /* Paper Kit shrink-wraps this row; stretch it to the container so the
+       links sit under the right-hand edge of the page content */
+    .footer .footrow { width: 100%; margin: 0; }
+    /* Soften the top edge, where the clouds meet the rule */
+    .footer::before {
+      content: ""; position: absolute; left: 0; right: 0; top: 0; height: 40%;
+      background: linear-gradient(to bottom, var(--sky-edge), rgba(0,0,0,0)); z-index: 1;
+    }
+    .footer-links { list-style: none; margin: 0; padding: 0; text-align: right; }
+    .footer-links li { margin-bottom: 6px; }
+    .footer-links a { display: inline-flex; align-items: center; gap: 8px; }
+    .footer-links img { width: 18px; height: 18px; }
+    [data-theme="dark"] .footer-links img { filter: brightness(1.5); }
   </style>
 </head>
 
@@ -100,14 +209,26 @@
 {% for item in nav %}
         <li class="nav-item"><a href="{{ item[1] }}" class="header_link"> {{ item[0] }}</a></li>
 {% endfor %}
+        <li class="nav-item">
+          <button id="theme-toggle" class="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="Dark mode">
+            <svg class="tt-icon tt-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="4.2"></circle>
+              <path d="M12 1.8v2.6M12 19.6v2.6M4.0 4.0l1.9 1.9M18.1 18.1l1.9 1.9M1.8 12h2.6M19.6 12h2.6M4.0 20.0l1.9-1.9M18.1 5.9l1.9-1.9"></path>
+            </svg>
+            <span class="tt-track"><span class="tt-knob"></span></span>
+            <svg class="tt-icon tt-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20.5 14.6A8.6 8.6 0 0 1 9.4 3.5a8.6 8.6 0 1 0 11.1 11.1z"></path>
+            </svg>
+          </button>
+        </li>
       </ul>
     </div>
   </div>
 </nav>
 
 <div class="wrapper">
-  <div class="page-header page-header-small hero">
-    <canvas id="hero-clouds"></canvas>
+  <div class="page-header page-header-small hero sky">
+    <canvas class="sky-canvas"></canvas>
     <div class="container">
       <div class="filter"></div>
       <div class="motto">
@@ -127,15 +248,18 @@
   </div>
 </div>
 
-<footer class="footer footer-black">
+<footer class="footer sky">
+  <canvas class="sky-canvas" data-flip data-drift="rtl"></canvas>
   <div class="container footcontainer">
     <div class="row footrow" style="padding: 50px 0px;">
       <nav class="footer-nav">
         <div>{{ footer_left | mdpara | safe }}</div>
       </nav>
-      <div class="credits ml-auto">
-        <span class="copyright">{{ footer_right | mdinline | safe }}</span>
-      </div>
+      <ul class="footer-links ml-auto">
+{% for link in footer_links %}
+        <li><a href="{{ link[1] }}"><img src="https://icongr.am/octicons/{{ link[2] }}.svg?size=18&color=2a7fb8" alt="">{{ link[0] }}</a></li>
+{% endfor %}
+      </ul>
     </div>
   </div>
 </footer>
@@ -148,10 +272,31 @@
 <script src="./assets/js/bootstrap.min.js"></script>
 <script src="./assets/js/bootstrap-switch.min.js"></script>
 <script src="./assets/js/paper-kit.js?v=2.1.1"></script>
-<script src="./assets/js/header-clouds.js?v=6"></script>
+<script src="./assets/js/header-clouds.js?v=8"></script>
 
-<!-- Scrollspy: highlight the active section in the navbar -->
 <script>
+  // Light/dark switch: remember the choice, and redraw the clouds in the
+  // colours of the new theme.
+  (function () {
+    const toggle = document.getElementById('theme-toggle');
+    const root = document.documentElement;
+    const sync = () => {
+      const dark = root.getAttribute('data-theme') === 'dark';
+      toggle.setAttribute('aria-checked', dark ? 'true' : 'false');
+      toggle.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+    };
+    sync();
+    toggle.addEventListener('click', () => {
+      const dark = root.getAttribute('data-theme') === 'dark';
+      if (dark) root.removeAttribute('data-theme');
+      else root.setAttribute('data-theme', 'dark');
+      try { localStorage.setItem('sciris-theme', dark ? 'light' : 'dark'); } catch (e) {}
+      sync();
+      if (window.scirisSky) window.scirisSky.refresh();
+    });
+  })();
+
+  // Scrollspy: highlight the active section in the navbar
   const changeNav = (entries) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting && entry.intersectionRatio >= 0.55) {
