@@ -9,15 +9,12 @@ nav:
   - [Examples, "#examples"]
   - [Features, "#features"]
   - [Cite, "#citation"]
-  - [Contact, "#contact"]
 footer_left: |
   © 2014–2026 by the Sciris Development Team
 
   Sciris is developed by the [Institute for Disease Modeling](https://idmod.org), the [Burnet Institute](https://burnet.edu.au), and other collaborators.
-
-  [Docs](https://docs.sciris.org) | [GitHub](https://github.com/sciris/sciris) | [PyPI](https://pypi.org/project/sciris) | [Paper](https://doi.org/10.21105/joss.05076)
 footer_right: |
-  Sciris is distributed under the MIT License. It is used in production by a number of scientific software projects, but we make no representations that it will suit your needs, and we cannot promise support. You are welcome to [fork it](https://github.com/sciris/sciris/fork) and adapt it as permitted under the license.
+  [GitHub](https://github.com/sciris/sciris) | [Docs](https://docs.sciris.org) | [PyPI](https://pypi.org/project/sciris) | [Paper](https://doi.org/10.21105/joss.05076) | [Contact](mailto:info@sciris.org)
 ---
 
 {% section "what", "What is Sciris?" %}
@@ -25,11 +22,11 @@ Sciris is a library of tools that make writing scientific Python code easier and
 {% endsection %}
 
 {% topbuttons %}
+{% topbtn "Code", "https://github.com/sciris/sciris", "octicons/mark-github" %}
 {% topbtn "Docs", "https://docs.sciris.org", "octicons/code" %}
 {% topbtn "Tutorials", "https://docs.sciris.org/tutorials.html", "fontawesome/lightbulb-o", "tight" %}
-{% topbtn "Code", "https://github.com/sciris/sciris", "octicons/mark-github" %}
 {% topbtn "Paper", "https://doi.org/10.21105/joss.05076", "octicons/book" %}
-{% topbtn "AI", "https://context7.com/sciris/sciris", "octicons/north-star" %}
+{% topbtn "MCP", "https://context7.com/sciris/sciris", "octicons/north-star" %}
 {% endtopbuttons %}
 
 {% cards "why", "Why Sciris?" %}
@@ -214,12 +211,4 @@ Kerr CC, Sanz-Leon P, Abeysuriya RG, Chadderdon GL, Harbuz VS, Saidi P, Quiroga 
 {% endcite %}
 
 The citation is also available in [BibTeX format](https://github.com/sciris/sciris/raw/main/docs/sciris-citation.bib).
-{% endsection %}
-
-{% section "contact", "Contact" %}
-Sciris is developed in the open on [GitHub](https://github.com/sciris/sciris), and contributions are welcome — see the [contributing guide](https://docs.sciris.org/contributing.html) to get started. If you find a bug or want a feature, please [open an issue](https://github.com/sciris/sciris/issues/new/choose).
-
-If you have questions, or would like some help getting started, email us at [info@sciris.org](mailto:info@sciris.org).
-
-Sciris also has [MCP servers](https://modelcontextprotocol.io) on [Context7](https://context7.com/sciris/sciris) and [GitMCP](https://gitmcp.io/sciris/sciris), plus a [Claude Code](https://code.claude.com/docs/en/overview) plugin covering all of its features: add <https://github.com/sciris/sciris> as a marketplace, then install the plugin from there.
 {% endsection %}

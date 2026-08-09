@@ -25,26 +25,60 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300..700&family=Rosario:ital,wght@0,300..700;1,300..700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Rosario:ital,wght@0,300..700;1,300..700&family=Rosarivo:ital@0;1&display=swap" rel="stylesheet">
   <link href='https://fonts.googleapis.com/css?family=Montserrat:400,300,700|Work+Sans|Material+Icons' rel='stylesheet' type='text/css'>
 
   <style>
-    /* Rosario for headings, Raleway for body text */
-    body, p, .card-description, li { font-family: "Raleway", "Montserrat", "Lato", sans-serif; }
-    h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, h6, .card-category, .motto h1 {
-      font-family: "Rosario", "Raleway", "Montserrat", sans-serif;
+    /* Rosarivo for headings and the navbar, Rosario for body text */
+    body, p, .card-description, li { font-family: "Rosario", "Montserrat", "Lato", sans-serif; }
+    h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, h6, .card-category, .motto h1,
+    .navbar .header_link, .nav-tabs .nav-link {
+      font-family: "Rosarivo", "Rosario", "Montserrat", serif;
     }
-    .header_link { font-size: 18px; }
+    .header_link { font-size: 18px; color: #16283c; }
+    .header_link:hover, .header_link:focus { color: #75A8D9; }
+    /* The hero is light, so the navbar reads as dark ink on it as on the page */
+    .navbar .navbar-toggler-bar { background: #16283c; }
+    .hero { position: relative; overflow: hidden; background-color: #f7f9fc; }
+    .hero #hero-fractal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+    /* A white veil over the fractal, so the title stays the loudest thing here */
+    .hero::before {
+      content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255, 255, 255, 0.35); z-index: 1;
+    }
+    /* Fade the fractal out into the white page below it */
+    .hero::after {
+      content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 45%;
+      background: linear-gradient(to bottom, rgba(255,255,255,0), #ffffff); z-index: 1;
+    }
+    .hero .container { position: relative; z-index: 2; }
+    .hero .motto h1 {
+      padding-top: 40px; font-weight: bold; font-size: 3em; color: #16283c;
+    }
+    /* Function names link to the API reference, but read as plain code */
+    a.apilink, a.apilink:hover { color: inherit; }
+    a.apilink code { border-bottom: 1px dotted #75A8D9; }
+    a.apilink:hover code { color: #75A8D9; }
     .header_link.active { font-weight: bold; color: #75A8D9; }
     .citation { background:#f8f9fa; border-left:4px solid #75A8D9; padding:15px 20px; border-radius:4px; font-size:0.95em; line-height:1.6; }
-    /* The hero is a gradient rather than a photo, so it needs no dark filter */
-    .page-header .filter { background: none; }
+    /* Paper Kit dims page headers for photo backgrounds; the hero is light */
+    .page-header .filter, .page-header .filter::after { background: none; }
+    /* Likewise, the navbar's dark gradient would fight with the light hero */
+    .navbar {
+      background-image: none;
+      background-color: rgba(255, 255, 255, 0.93);
+      border-bottom-width: 1px;
+      border-color: #e4eaf1 !important;
+    }
     .featurecols h4 { font-size: 1.1em; font-weight: bold; margin-bottom: 5px; }
     .featurecols ul { padding-left: 20px; }
     .featurecols code { font-size: 0.95em; }
     .nav-link-narrow { padding-left: 12px; padding-right: 12px; }
     /* Paper Kit's default footer text is too dark to read on the black footer */
     .footer-black .copyright, .footer-black .copyright a { color: #a0a0a0; }
+    /* The footer links are now the only thing on the right, so pin them there */
+    .footer .credits { text-align: right; }
+    .footer .credits .copyright { font-size: 1em; }
   </style>
 </head>
 
@@ -54,7 +88,7 @@
   <div class="container">
     <div class="navbar-translate">
       <a class="navbar-brand" href="https://sciris.org/">
-        <img src="./assets/img/sciris-logo-horiz-white.png" id="header_logo" style="width:150px; margin-top:-6px;" alt="Sciris logo">
+        <img src="./assets/img/sciris-logo-horiz.png" id="header_logo" style="width:150px; margin-top:-6px;" alt="Sciris logo">
       </a>
       <button class="navbar-toggler navbar-toggler-right navbar-burger" type="button" data-toggle="collapse" data-target="#navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-bar"></span>
@@ -73,11 +107,12 @@
 </nav>
 
 <div class="wrapper">
-  <div class="page-header page-header-small" style="background-image: linear-gradient(135deg, #151515 0%, #2c3e50 55%, #447099 100%);">
+  <div class="page-header page-header-small hero">
+    <canvas id="hero-fractal"></canvas>
     <div class="container">
       <div class="filter"></div>
       <div class="motto">
-        <h1 style="padding-top:40px; font-weight:bold; font-size:3em;">{{ hero | mdinline | safe }}</h1>
+        <h1>{{ hero | mdinline | safe }}</h1>
       </div>
     </div>
   </div>
@@ -114,6 +149,7 @@
 <script src="./assets/js/bootstrap.min.js"></script>
 <script src="./assets/js/bootstrap-switch.min.js"></script>
 <script src="./assets/js/paper-kit.js?v=2.1.1"></script>
+<script src="./assets/js/header-fractal.js?v=2"></script>
 
 <!-- Scrollspy: highlight the active section in the navbar -->
 <script>

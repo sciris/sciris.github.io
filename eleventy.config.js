@@ -2,6 +2,83 @@ const markdownIt = require("markdown-it");
 
 const md = markdownIt({ html: true, linkify: true });
 
+// Module that each documented Sciris function/class lives in, so that inline
+// code like `sc.loadjson()` can be linked to its API reference entry, e.g.
+// https://docs.sciris.org/api/sc_fileio.html#sciris.sc_fileio.loadjson
+const API_MODULES = {
+  asd: "sc_asd",
+  boxoff: "sc_plotting",
+  colorize: "sc_printing",
+  commaticks: "sc_plotting",
+  compareversions: "sc_versioning",
+  dataframe: "sc_dataframe",
+  date: "sc_datetime",
+  dateformatter: "sc_plotting",
+  daterange: "sc_datetime",
+  dcp: "sc_utils",
+  equal: "sc_nested",
+  findfirst: "sc_math",
+  findinds: "sc_math",
+  findlast: "sc_math",
+  findnearest: "sc_math",
+  getfilelist: "sc_fileio",
+  gridcolors: "sc_colors",
+  heading: "sc_printing",
+  help: "sc_settings",
+  load: "sc_fileio",
+  loadarchive: "sc_versioning",
+  loadbalancer: "sc_parallel",
+  loadjson: "sc_fileio",
+  loadmetadata: "sc_versioning",
+  loadyaml: "sc_fileio",
+  objdict: "sc_odict",
+  odict: "sc_odict",
+  parallelize: "sc_parallel",
+  plot3d: "sc_plotting",
+  pr: "sc_printing",
+  printbold: "sc_printing",
+  profile: "sc_profiling",
+  progressbar: "sc_printing",
+  readdate: "sc_datetime",
+  require: "sc_versioning",
+  robust_dcp: "sc_utils",
+  safedivide: "sc_math",
+  save: "sc_fileio",
+  savearchive: "sc_versioning",
+  savefig: "sc_plotting",
+  savejson: "sc_fileio",
+  savemovie: "sc_plotting",
+  savetext: "sc_fileio",
+  search: "sc_nested",
+  sigfig: "sc_printing",
+  SIticks: "sc_plotting",
+  smooth: "sc_math",
+  surf3d: "sc_plotting",
+  thisdir: "sc_fileio",
+  tic: "sc_datetime",
+  timer: "sc_datetime",
+  toarray: "sc_utils",
+  toc: "sc_datetime",
+  tolist: "sc_utils",
+  vectocolor: "sc_colors",
+};
+
+const API_BASE = "https://docs.sciris.org/api/";
+const API_RE = /^sc\.([A-Za-z_]\w*)(\.\w+)?\(?\)?$/;
+
+// Turn `sc.foo()` inline code into a link to the API reference.
+const baseCodeInline = md.renderer.rules.code_inline;
+md.renderer.rules.code_inline = (tokens, idx, options, env, self) => {
+  const html = baseCodeInline(tokens, idx, options, env, self);
+  const match = API_RE.exec(tokens[idx].content.trim());
+  if (!match) return html;
+  const [, name, method] = match;
+  const mod = API_MODULES[name];
+  if (!mod) return html;
+  const anchor = `sciris.${mod}.${name}${method || ""}`;
+  return `<a class="apilink" href="${API_BASE}${mod}.html#${anchor}">${html}</a>`;
+};
+
 const H2_STYLE =
   "padding-top:80px; margin-top:-20px; padding-bottom:20px; font-weight:bold; color:#333333;";
 
