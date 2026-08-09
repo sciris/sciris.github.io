@@ -79,8 +79,9 @@ md.renderer.rules.code_inline = (tokens, idx, options, env, self) => {
   return `<a class="apilink" href="${API_BASE}${mod}.html#${anchor}">${html}</a>`;
 };
 
+// No colour here: section headings take their colour from the theme.
 const H2_STYLE =
-  "padding-top:80px; margin-top:-20px; padding-bottom:20px; font-weight:bold; color:#333333;";
+  "padding-top:80px; margin-top:-20px; padding-bottom:20px; font-weight:bold;";
 
 module.exports = function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy("assets");

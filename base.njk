@@ -92,7 +92,10 @@
       font-family: Consolas, Monaco, "Ubuntu Mono", monospace;
     }
 
+    /* Paper Kit paints .wrapper and .section white, which would show through
+       the dark theme; the page background is set once, on the body */
     body { background: var(--bg); color: var(--text); }
+    .wrapper, .main, .section, .profile-tabs, .tab-content { background: transparent; }
     h1, h2, h3, h4, h5, h6, .card-category { color: var(--heading); }
     a { color: var(--link); }
     a:hover, a:focus { color: var(--link-hover); }
@@ -129,7 +132,8 @@
     a.apilink:hover, a.apilink:hover code { color: var(--link-hover); }
     a.apilink code { border-bottom: 1px dotted currentColor; }
 
-    .card { background-color: var(--card); border: 1px solid var(--card-border); }
+    .card, .card .card-description { background-color: var(--card); color: var(--text); }
+    .card { border: 1px solid var(--card-border); }
     .citation {
       background: var(--card); border-left: 4px solid var(--link);
       padding: 15px 20px; border-radius: 4px; font-size: 0.95em; line-height: 1.6;
@@ -139,9 +143,13 @@
     .featurecols ul { padding-left: 20px; }
     .featurecols code { font-size: 0.95em; }
     .nav-link-narrow { padding-left: 12px; padding-right: 12px; }
-    /* Prism's palette is built for a light background, so code stays light */
-    [data-theme="dark"] :not(pre) > code[class*="language-"],
+    /* Prism's palette is built for a light background, so code *blocks* stay
+       on a light surface; inline code gets a dark chip to suit the page */
     [data-theme="dark"] pre[class*="language-"] { background: #e9edf0; }
+    [data-theme="dark"] :not(pre) > code {
+      background: #22303d; color: #e79a9a; border: 0;
+    }
+    [data-theme="dark"] a.apilink code { background: none; color: var(--link); }
     [data-theme="dark"] .nav-tabs .nav-link { color: var(--text); }
     /* The card icons are flat black PNGs/SVGs, invisible on a dark card */
     [data-theme="dark"] .card-image img { filter: invert(0.85); }
