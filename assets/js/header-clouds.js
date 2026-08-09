@@ -8,6 +8,12 @@
 
   var CANVAS_CLASS = "sky-canvas";
 
+  // The clouds move at 4-11 px/s, so painting 60 times a second redraws the
+  // whole sky to move it a tenth of a pixel. 15 fps is under a pixel a frame
+  // at the fastest layer, which looks the same and costs a quarter as much.
+  var FPS = 15;
+  var FRAME_MS = 1000 / FPS;
+
   // Pencil and paper colours come from the stylesheet, so the light and dark
   // themes can each set their own; readTheme() picks up the current pair.
   var GRAPHITE = "70, 82, 98";
@@ -317,6 +323,8 @@
     // other way. The footer uses both.
     this.flip = canvas.hasAttribute("data-flip");
     this.dir = canvas.getAttribute("data-drift") === "rtl" ? -1 : 1;
+    // Set by the IntersectionObserver in init(); true until it first reports.
+    this.onScreen = true;
   }
 
   Sky.prototype.setup = function () {
@@ -391,6 +399,8 @@
     }
     for (var i = 0; i < this.clouds.length; i++) {
       var c = this.clouds[i];
+      // A third of the band is parked off either side, waiting to come round.
+      if (c.x > this.cssW || c.x + c.w < 0) continue;
       ctx.globalAlpha = c.alpha;
       ctx.drawImage(c.sprite, c.x, c.y, c.w, c.h);
     }
@@ -402,27 +412,42 @@
   var lastTime = 0;
   var animating = false;
 
+  function anyVisible() {
+    for (var i = 0; i < skies.length; i++) if (skies[i].onScreen) return true;
+    return false;
+  }
+
   function step(now) {
     if (!animating) return;
-    var dt = lastTime ? Math.min(0.05, (now - lastTime) / 1000) : 0;
+    // Only a scrolled-into-view sky is worth painting, and only every
+    // FRAME_MS; otherwise this is a no-op that costs one callback.
+    if (now - lastTime < FRAME_MS) {
+      requestAnimationFrame(step);
+      return;
+    }
+    var dt = lastTime ? Math.min(0.25, (now - lastTime) / 1000) : 0;
     lastTime = now;
     for (var i = 0; i < skies.length; i++) {
+      if (!skies[i].onScreen) continue;
       skies[i].advance(dt);
       skies[i].paint();
     }
+    if (anyVisible()) requestAnimationFrame(step);
+    else animating = false;
+  }
+
+  function startLoop() {
+    var still = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (still || animating || !anyVisible()) return;
+    animating = true;
+    lastTime = 0;
     requestAnimationFrame(step);
   }
 
   function setupAll() {
     readTheme();
     for (var i = 0; i < skies.length; i++) skies[i].setup();
-
-    var still = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (!still && !animating && skies.length) {
-      animating = true;
-      lastTime = 0;
-      requestAnimationFrame(step);
-    }
+    startLoop();
   }
 
   function init() {
@@ -431,6 +456,24 @@
       // A different seed per sky, so the header and the footer differ.
       skies.push(new Sky(canvases[i], 20140107 + i * 7919));
     }
+
+    // Stop animating a sky that has been scrolled past: the footer is off
+    // screen most of the time, and the header once you start reading.
+    if (window.IntersectionObserver) {
+      var observer = new IntersectionObserver(function (entries) {
+        for (var i = 0; i < entries.length; i++) {
+          var sky = entries[i].target.__sky;
+          if (sky) sky.onScreen = entries[i].isIntersecting;
+        }
+        startLoop();
+      });
+      for (var j = 0; j < skies.length; j++) {
+        skies[j].onScreen = false;
+        skies[j].canvas.__sky = skies[j];
+        observer.observe(skies[j].canvas);
+      }
+    }
+
     setupAll();
   }
 
