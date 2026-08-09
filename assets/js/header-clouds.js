@@ -9,9 +9,16 @@
   var CANVAS_ID = "hero-clouds";
 
   var GRAPHITE = "70, 82, 98";
-  var CLOUD_COUNT = 7;
-  var SPEED_MIN = 4; // pixels per second
-  var SPEED_MAX = 11;
+  var FILL = "rgba(255, 255, 255, 0.78)";
+
+  // Clouds are laid out in depth layers. Within a layer every cloud moves at
+  // the same speed and they are evenly spaced around a wrap-around band, so
+  // the spacing never drifts apart and there is always another one coming.
+  var LAYERS = [
+    { minH: 34, maxH: 52, speed: 4.5, alpha: 0.5, top: -0.05, bottom: 0.35, gap: 1.05 },
+    { minH: 52, maxH: 78, speed: 7.5, alpha: 0.78, top: 0.1, bottom: 0.6, gap: 1.15 },
+    { minH: 78, maxH: 116, speed: 11, alpha: 1, top: 0.28, bottom: 0.8, gap: 1.3 },
+  ];
 
   // Deterministic RNG, so the sky is laid out the same way on every load.
   function rng(seed) {
@@ -75,11 +82,9 @@
 
   /* ---- Cloud shape ----------------------------------------------------- */
 
-  // A cloud is a row of heavily overlapping puffs sitting on a flat base. Its
-  // outline is the boundary of their union: sample each puff and drop the
-  // samples that fall inside another puff, or below the base line. The puffs
-  // are stepped along by little more than one radius each, so neighbours
-  // always overlap and the union reads as one billowing shape.
+  // A cloud is a row of heavily overlapping puffs sitting on a flat base. The
+  // puffs are stepped along by little more than one radius each, so neighbours
+  // always overlap and their union reads as one billowing shape.
   function cloudPuffs(rand, width, height) {
     var puffs = [];
     var base = height * 0.88;
@@ -123,26 +128,68 @@
     return false;
   }
 
-  // The visible arcs of the union boundary, as a list of polylines.
+  // The silhouette: the runs of each puff's circle that are on the outside of
+  // the union and above the base.
   function outlineArcs(shape) {
     var arcs = [];
     for (var i = 0; i < shape.puffs.length; i++) {
       var c = shape.puffs[i];
-      var steps = Math.max(28, Math.round(c.r * 1.6));
+      var steps = Math.max(30, Math.round(c.r * 1.8));
       var run = [];
       for (var s = 0; s <= steps; s++) {
         var a = (s / steps) * Math.PI * 2;
         var x = c.x + Math.cos(a) * c.r;
         var y = c.y + Math.sin(a) * c.r;
-        var hidden = y > shape.base || insideOther(shape.puffs, i, x, y);
-        if (hidden) {
+        if (!insideOther(shape.puffs, i, x, y) && y <= shape.base) {
+          run.push({ x: x, y: y });
+        } else {
           if (run.length > 3) arcs.push(run);
           run = [];
-        } else {
-          run.push({ x: x, y: y });
         }
       }
       if (run.length > 3) arcs.push(run);
+    }
+    return arcs;
+  }
+
+  // Where two neighbouring puffs overlap, the smaller one's arc *inside* the
+  // larger is the crescent you would draw to show one lobe bulging in front of
+  // the other. These interior lines are what stop the cloud reading as a flat
+  // outline: they give it front-to-back depth.
+  function lobeArcs(shape) {
+    var arcs = [];
+    for (var i = 0; i < shape.puffs.length - 1; i++) {
+      var a = shape.puffs[i];
+      var b = shape.puffs[i + 1];
+      var dx = b.x - a.x;
+      var dy = b.y - a.y;
+      var d = Math.sqrt(dx * dx + dy * dy);
+      // Skip pairs that barely touch, or where one swallows the other whole.
+      if (d >= a.r + b.r || d <= Math.abs(a.r - b.r) * 1.05) continue;
+
+      var small = a.r <= b.r ? a : b;
+      var big = a.r <= b.r ? b : a;
+      // Start sampling on the far side of the small puff, so the run that
+      // falls inside the big one comes out in one piece rather than split
+      // across the seam.
+      var a0 = Math.atan2(big.y - small.y, big.x - small.x) + Math.PI;
+      var steps = Math.max(48, Math.round(small.r * 2));
+      var run = [];
+      for (var s = 0; s <= steps; s++) {
+        var ang = a0 + (s / steps) * Math.PI * 2;
+        var x = small.x + Math.cos(ang) * small.r;
+        var y = small.y + Math.sin(ang) * small.r;
+        var ddx = x - big.x;
+        var ddy = y - big.y;
+        var inside = ddx * ddx + ddy * ddy < big.r * big.r;
+        if (inside && y < shape.base - small.r * 0.05) {
+          run.push({ x: x, y: y });
+        } else {
+          if (run.length > 8) arcs.push(run);
+          run = [];
+        }
+      }
+      if (run.length > 8) arcs.push(run);
     }
     return arcs;
   }
@@ -156,37 +203,39 @@
     }
   }
 
-  // Diagonal hatching along the underside, the way you would shade a cloud.
-  function shadeUnderside(ctx, shape, rand, width, height) {
-    ctx.save();
-    cloudPath(ctx, shape);
-    ctx.clip();
-    var step = 5;
-    for (var x = -height; x < width + height; x += step) {
-      var pts = [
-        { x: x, y: shape.base + 2 },
-        { x: x + height * 0.55, y: shape.base - height * 0.55 },
-      ];
-      // Only the strokes nearest the base, fading out as they climb.
-      pencilStroke(ctx, [pts[0], { x: lerp(pts[0].x, pts[1].x, 0.5), y: lerp(pts[0].y, pts[1].y, 0.5) }], rand, {
-        passes: 1,
-        jitter: 0.6,
-        alpha: 0.1,
-        width: 1,
-      });
-    }
-    ctx.restore();
-  }
-
+  // Returns { canvas, w, h }: the sprite, and the size to draw it at. The
+  // sprite is padded, because the outermost puffs bulge past the nominal
+  // width and the tallest one past the nominal top.
   function drawCloud(rand, width, height, dpr) {
+    var pad = height * 0.25;
+    var w = width + pad * 2;
+    var h = height + pad;
+
     var canvas = document.createElement("canvas");
-    canvas.width = Math.ceil(width * dpr);
-    canvas.height = Math.ceil(height * dpr);
+    canvas.width = Math.ceil(w * dpr);
+    canvas.height = Math.ceil(h * dpr);
     var ctx = canvas.getContext("2d");
     ctx.scale(dpr, dpr);
+    ctx.translate(pad, pad);
 
     var shape = cloudPuffs(rand, width, height);
-    shadeUnderside(ctx, shape, rand, width, height);
+
+    // Translucent white body, clipped off at the flat base. Filling all the
+    // puffs as a single path means the overlaps do not stack up and darken.
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(-pad, -pad, w, shape.base + pad);
+    ctx.clip();
+    cloudPath(ctx, shape);
+    ctx.fillStyle = FILL;
+    ctx.fill();
+    ctx.restore();
+
+    // Interior lobes first, so the silhouette drawn over them stays crisp.
+    var lobes = lobeArcs(shape);
+    for (var j = 0; j < lobes.length; j++) {
+      pencilStroke(ctx, lobes[j], rand, { passes: 2, jitter: 0.9, alpha: 0.2, width: 1 });
+    }
 
     var arcs = outlineArcs(shape);
     for (var i = 0; i < arcs.length; i++) {
@@ -203,7 +252,7 @@
       pencilStroke(ctx, basePts, rand, { passes: 2, jitter: 1.5, alpha: 0.26, width: 1 });
     }
 
-    return canvas;
+    return { canvas: canvas, w: w, h: h };
   }
 
   /* ---- The sky --------------------------------------------------------- */
@@ -215,22 +264,36 @@
 
   function build() {
     var rand = rng(20140107);
+    var scale = Math.max(0.75, cssH / 290);
     clouds = [];
-    var span = cssW + 260; // clouds wrap around a band wider than the header
-    for (var i = 0; i < CLOUD_COUNT; i++) {
-      // A mix of near (large, faster, darker) and far (small, slower, fainter).
-      var depth = rand();
-      var h = lerp(56, 118, depth) * (cssH / 290);
-      var w = h * lerp(2.4, 3.4, rand());
-      clouds.push({
-        sprite: drawCloud(rand, w, h, dpr),
-        w: w,
-        h: h,
-        x: (i / CLOUD_COUNT) * span + rand() * 60 - 130,
-        y: lerp(-h * 0.15, cssH * 0.72, rand()),
-        speed: lerp(SPEED_MIN, SPEED_MAX, depth),
-        alpha: lerp(0.45, 1, depth),
-      });
+
+    for (var l = 0; l < LAYERS.length; l++) {
+      var layer = LAYERS[l];
+      var midH = ((layer.minH + layer.maxH) / 2) * scale;
+      var midW = midH * 2.9;
+      // Space them barely more than a cloud apart, so the sky stays busy
+      // without the clouds merging into one continuous bank.
+      var spacing = midW * layer.gap;
+      var band = cssW + midW * 2;
+      var count = Math.max(3, Math.round(band / spacing));
+      var slot = band / count;
+
+      for (var i = 0; i < count; i++) {
+        var h = lerp(layer.minH, layer.maxH, rand()) * scale;
+        var w = h * lerp(2.4, 3.4, rand());
+        var sprite = drawCloud(rand, w, h, dpr);
+        clouds.push({
+          sprite: sprite.canvas,
+          w: sprite.w,
+          h: sprite.h,
+          band: band,
+          // Even slots, nudged a little so the row does not look ruled.
+          x: i * slot + (rand() - 0.5) * slot * 0.4 - midW,
+          y: lerp(layer.top, layer.bottom, rand()) * cssH,
+          speed: layer.speed,
+          alpha: layer.alpha * lerp(0.85, 1, rand()),
+        });
+      }
     }
     clouds.sort(function (a, b) { return a.alpha - b.alpha; });
   }
@@ -252,7 +315,8 @@
     for (var i = 0; i < clouds.length; i++) {
       var c = clouds[i];
       c.x += c.speed * dt;
-      if (c.x > cssW + 130) c.x = -c.w - 130;
+      // Wrapping by exactly one band keeps each layer evenly spaced forever.
+      if (c.x > c.band - c.w) c.x -= c.band;
     }
     paint();
     requestAnimationFrame(step);
