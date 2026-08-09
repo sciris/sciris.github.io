@@ -8,11 +8,17 @@
 
   var CANVAS_CLASS = "sky-canvas";
 
-  // The clouds move at 4-11 px/s, so painting 60 times a second redraws the
-  // whole sky to move it a tenth of a pixel. 15 fps is under a pixel a frame
-  // at the fastest layer, which looks the same and costs a quarter as much.
+  // What reads as jerky is the distance a cloud jumps between frames, which is
+  // speed over frame rate. Raising the rate costs CPU in proportion; slowing
+  // the drift costs nothing, so most of the smoothing below comes from the
+  // speeds in LAYERS having been eased off. Together they put the fastest
+  // layer at about half a pixel a frame, down from just under one.
   var FPS = 15;
   var FRAME_MS = 1000 / FPS;
+
+  // Sprites are pencil lines on a pale wash, so they survive being rendered
+  // below the full device pixel ratio; fill cost scales with its square.
+  var MAX_DPR = 1.5;
 
   // Pencil and paper colours come from the stylesheet, so the light and dark
   // themes can each set their own; readTheme() picks up the current pair.
@@ -31,9 +37,9 @@
   // the same speed and they are evenly spaced around a wrap-around band, so
   // the spacing never drifts apart and there is always another one coming.
   var LAYERS = [
-    { minH: 34, maxH: 52, speed: 4.5, alpha: 0.5, top: -0.05, bottom: 0.35, gap: 1.05 },
-    { minH: 52, maxH: 78, speed: 7.5, alpha: 0.78, top: 0.1, bottom: 0.6, gap: 1.15 },
-    { minH: 78, maxH: 116, speed: 11, alpha: 1, top: 0.28, bottom: 0.8, gap: 1.3 },
+    { minH: 34, maxH: 52, speed: 3.2, alpha: 0.5, top: -0.05, bottom: 0.35, gap: 1.05 },
+    { minH: 52, maxH: 78, speed: 5.2, alpha: 0.78, top: 0.1, bottom: 0.6, gap: 1.15 },
+    { minH: 78, maxH: 116, speed: 7.7, alpha: 1, top: 0.28, bottom: 0.8, gap: 1.3 },
   ];
 
   // Deterministic RNG, so the sky is laid out the same way on every load.
@@ -332,7 +338,7 @@
     this.cssW = canvas.offsetWidth;
     this.cssH = canvas.offsetHeight;
     if (!this.cssW || !this.cssH) return;
-    var dpr = Math.min(2, window.devicePixelRatio || 1);
+    var dpr = Math.min(MAX_DPR, window.devicePixelRatio || 1);
     canvas.width = Math.round(this.cssW * dpr);
     canvas.height = Math.round(this.cssH * dpr);
     this.ctx = canvas.getContext("2d");
