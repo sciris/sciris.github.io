@@ -8,7 +8,6 @@ nav:
   - [Install, "#installation"]
   - [Examples, "#examples"]
   - [Features, "#features"]
-  - [Used by, "#usedby"]
   - [Cite, "#citation"]
   - [Contact, "#contact"]
 footer_left: |
@@ -205,16 +204,6 @@ A selection of the most commonly used functions. The [API reference](https://doc
 - `sc.help()`: full-text search of the Sciris source code
 {% endcolumn %}
 {% endcolumns %}
-{% endsection %}
-
-{% section "usedby", "Where Sciris is used" %}
-Work on Sciris began in 2014, to support development of the [Optima](http://optimamodel.com) suite of models. We kept running into the same inconveniences while building scientific webapps, and started collecting the tools we used to get around them into a shared library.
-
-That investment paid off in early 2020, when Sciris' brevity and simplicity helped enable the rapid development of [Covasim](https://covasim.org), a COVID-19 model that went on to be used by students, researchers, and policymakers in over 30 countries. Sciris is now a dependency of a number of scientific software projects, including [Starsim](https://starsim.org), [Atomica](http://atomica.tools), [FPsim](https://fpsim.org), [SynthPops](https://github.com/InstituteforDiseaseModeling/synthpops), and [ScirisWeb](https://github.com/sciris/scirisweb), which provides the backend for webapps such as the [Cascade Analysis Tool](http://cascade.tools).
-
-Sciris is not a product of any one project, and it does not assume anything about your domain. If it saves you some typing, it is doing its job.
-
-(The name, incidentally, is a portmanteau of "scientific" and "iris" — a reference to seeing clearly, and to the Greek word for "rainbow.")
 {% endsection %}
 
 {% section "citation", "Citing Sciris" %}
