@@ -14,11 +14,11 @@ footer_left: |
 
   Sciris is developed by the [Institute for Disease Modeling](https://idmod.org),<br>the [Burnet Institute](https://burnet.edu.au), and other collaborators.
 footer_links:
-  - [GitHub, "https://github.com/sciris/sciris", mark-github]
-  - [Docs, "https://docs.sciris.org", note]
-  - [PyPI, "https://pypi.org/project/sciris", package]
-  - [Paper, "https://doi.org/10.21105/joss.05076", book]
-  - [Contact, "mailto:info@sciris.org", mail]
+  - [GitHub, "https://github.com/sciris/sciris", "octicons/mark-github"]
+  - [Docs, "https://docs.sciris.org", "fontawesome/file-text"]
+  - [PyPI, "https://pypi.org/project/sciris", "octicons/package"]
+  - [Paper, "https://doi.org/10.21105/joss.05076", "octicons/book"]
+  - [Contact, "mailto:info@sciris.org", "octicons/mail"]
 ---
 
 {% section "what", "What is Sciris?" %}
@@ -27,7 +27,7 @@ Sciris is a library of tools that make writing scientific Python code easier and
 
 {% topbuttons %}
 {% topbtn "Code", "https://github.com/sciris/sciris", "octicons/mark-github" %}
-{% topbtn "Docs", "https://docs.sciris.org", "octicons/code" %}
+{% topbtn "Docs", "https://docs.sciris.org", "fontawesome/file-text" %}
 {% topbtn "Tutorials", "https://docs.sciris.org/tutorials.html", "fontawesome/lightbulb-o", "tight" %}
 {% topbtn "Paper", "https://doi.org/10.21105/joss.05076", "octicons/book" %}
 {% topbtn "MCP", "https://context7.com/sciris/sciris", "octicons/north-star" %}
