@@ -22,7 +22,7 @@ footer_links:
 ---
 
 {% section "what", "What is Sciris?" %}
-Sciris is a library of tools that make writing scientific Python code easier and more pleasant. Built on top of [NumPy](https://numpy.org) and [Matplotlib](https://matplotlib.org), it covers a wide range of common math, file I/O, and plotting operations, so you can get more done with less code. It is a "library of the gaps": the annoyances it addresses are each too small to need a dedicated library of their own, but common enough that together they add up.
+Sciris is a library of tools that make writing scientific Python code easier and more pleasant. Built on top of [NumPy](https://numpy.org) and [Matplotlib](https://matplotlib.org), it covers a wide range of common math, file I/O, and plotting operations, so you can get more done with less code. It's a "library of the gaps": the annoyances it addresses are each too small to need a dedicated library of their own, but common enough that together they add up. It's a bit like [tidyverse](https://tidyverse.org/) for Python.
 {% endsection %}
 
 {% topbuttons %}
