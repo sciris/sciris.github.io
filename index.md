@@ -15,14 +15,14 @@ footer_left: |
   Sciris is developed by the [Institute for Disease Modeling](https://idmod.org),<br>the [Burnet Institute](https://burnet.edu.au), and other collaborators.
 footer_links:
   - [GitHub, "https://github.com/sciris/sciris", mark-github]
-  - [Docs, "https://docs.sciris.org", code]
+  - [Docs, "https://docs.sciris.org", note]
   - [PyPI, "https://pypi.org/project/sciris", package]
   - [Paper, "https://doi.org/10.21105/joss.05076", book]
   - [Contact, "mailto:info@sciris.org", mail]
 ---
 
 {% section "what", "What is Sciris?" %}
-Sciris is a library of tools that make writing scientific Python code easier and more pleasant. Built on top of [NumPy](https://numpy.org) and [Matplotlib](https://matplotlib.org), it covers a wide range of common math, file I/O, and plotting operations, so you can get more done with less code. It's a "library of the gaps": the annoyances it addresses are each too small to need a dedicated library of their own, but common enough that together they add up. It's a bit like [tidyverse](https://tidyverse.org/) for Python.
+Sciris is a library of tools that make writing scientific Python code easier and more pleasant. Extending [NumPy](https://numpy.org) and [Matplotlib](https://matplotlib.org), it covers a wide range of common math, file I/O, and plotting operations, so you can do more with less code. It's a "library of the gaps": the annoyances it addresses are too small to need dedicated libraries of their own, but common enough that together they add up. Philosophically, Sciris is like [tidyverse](https://tidyverse.org/) for Python.
 {% endsection %}
 
 {% topbuttons %}
@@ -35,23 +35,23 @@ Sciris is a library of tools that make writing scientific Python code easier and
 
 {% cards "why", "Why Sciris?" %}
 {% card "Brevity", "flash" %}
-Sciris packages common patterns that require multiple lines of code into single, simple functions: `sc.parallelize()` to run a function across CPUs, `sc.save()` and `sc.load()` for arbitrary Python objects, `sc.surf3d()` for a 3D plot. Less code to write means less code to debug.
+Sciris turns common patterns requiring multiple lines of code into simple functions: `sc.parallelize()` to run a function across CPUs, `sc.save()` and `sc.load()` for arbitrary Python objects, `sc.surf3d()` for a 3D plot. Less code to write means less code to debug (and fewer tokens).
 {% endcard %}
 {% card "Plain names", "eye" %}
-Functions are named after what they do, not after how they do it: `sc.smooth()`, `sc.findnearest()`, `sc.safedivide()`. Some names (`sc.tic()`, `sc.toc()`, `sc.boxoff()`) will look familiar if you have used MATLAB.
+Functions are simply named and easy to type: `sc.smooth()`, `sc.findnearest()`, `sc.safedivide()`, `sc.boxoff()`. Sciris repackages clunky parts of the standard library, so you can type `sc.require()` instead of puzzling over `packaging.requirements`.
 {% endcard %}
 {% card "Forgiving defaults", "life-ring" %}
-Many Sciris functions take a `die` argument, so you can choose how strict you want to be. With `die=False`, Sciris warns and returns `None` so you can decide what to do next; with `die=True`, it raises. Either way, you write fewer try/except blocks.
+Sciris lets you choose how strict to be: many functions take a `die` argument, with `die=True` raising an exception and `die=False` valiantly forging ahead. Either way, you write fewer try/except blocks (but there's `sc.tryexcept()` to turn four lines into two – or even one).
 {% endcard %}
 {% endcards %}
 
 {% section "installation", "Installation" %}
-Sciris requires Python 3.9 or later, and has no dependencies beyond the usual scientific Python stack.
+Sciris requires Python 3.10 or later, and is based on the usual scientific Python stack.
 
 ```bash
-pip install sciris          # using pip
-uv add sciris               # using uv
-conda install -c conda-forge sciris   # using conda
+pip install sciris  # using pip
+uv add sciris       # using uv
+conda install -c conda-forge sciris  # using conda
 ```
 
 Then:
@@ -60,8 +60,9 @@ Then:
 import sciris as sc
 ```
 
-Doing science is left as an exercise to the reader.
 {% endsection %}
+
+
 
 {% examples %}
 {% tab "Containers", "" %}
@@ -93,7 +94,7 @@ v = np.random.rand(100)
 sc.findinds(v>0.4, v<0.6)    # Indices where both conditions hold
 ```
 
-The first line is equivalent to `np.nonzero(np.isclose(arr, val))[0]`, and the second to `((v>0.4)*(v<0.6)).nonzero()[0]`. Related functions include `sc.findnearest()` (nearest value, whether or not it matches exactly), `sc.findfirst()`, `sc.findlast()`, and `sc.smooth()`.
+The first line is equivalent to `np.nonzero(np.isclose(arr, val))[0]`, and the second to `((v>0.4)*(v<0.6)).nonzero()[0]`. Related functions include `sc.findnearest()` (nearest value, whether or not it matches exactly), `sc.findfirst()`, and `sc.findlast()`.
 {% endtab %}
 
 {% tab "Files", "" %}
@@ -121,7 +122,7 @@ out3 = sc.parallelize(f, iterkwargs=[{'x':1, 'y':2},
                                      {'x':3, 'y':4}])
 ```
 
-All three return `[2, 6, 12]`. By default the pool size is set from the number of CPUs available, but you can fix it, or allocate dynamically based on current load with `sc.loadbalancer()`.
+All three return `[2, 6, 12]`. By default the pool size is set from the number of CPUs available, but you can specify it, or allocate dynamically based on current load with `sc.loadbalancer()`.
 {% endtab %}
 
 {% tab "Plotting", "assets/img/example-plotting.png" %}
@@ -150,8 +151,10 @@ This is the output of the two scripts in the previous tab: plain Python on the l
 {% endtab %}
 {% endexamples %}
 
+
+
 {% section "features", "What's in it", "wide" %}
-A selection of the most commonly used functions. The [API reference](https://docs.sciris.org/api/) has the rest.
+A selection of the most commonly used functions:
 
 {% columns %}
 {% column %}
@@ -159,7 +162,7 @@ A selection of the most commonly used functions. The [API reference](https://doc
 
 - `sc.odict()`: dictionary that also acts like a list and an array
 - `sc.objdict()`: an odict that supports `foo.bar` as well as `foo['bar']`
-- `sc.dataframe()`: a pandas DataFrame with extra conveniences
+- `sc.dataframe()`: a pandas DataFrame with extra conveniences 
 
 #### Math and arrays
 
@@ -182,6 +185,8 @@ A selection of the most commonly used functions. The [API reference](https://doc
 - `sc.sigfig()`: round a number to a given number of significant figures
 - `sc.progressbar()`: show progress through a loop
 {% endcolumn %}
+
+
 {% column %}
 #### Plotting
 
@@ -206,6 +211,8 @@ A selection of the most commonly used functions. The [API reference](https://doc
 {% endcolumn %}
 {% endcolumns %}
 {% endsection %}
+
+
 
 {% section "citation", "Citing Sciris" %}
 Sciris is described in the following paper, published in the *Journal of Open Source Software*:
